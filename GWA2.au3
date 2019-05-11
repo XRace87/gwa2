@@ -126,52 +126,52 @@ Local $mChangeStatusPtr = DllStructGetPtr($mChangeStatus)
 #EndRegion CommandStructs
 
 #Region Headers
-$SalvageMaterialsHeader = 0x7F
-$SalvageModHeader = 0x80
-$IdentifyItemHeader = 0x71
+$SalvageMaterialsHeader = 0x80
+$SalvageModHeader = 0x81
+$IdentifyItemHeader = 0x72
 $EquipItemHeader = 0x36
-$UseItemHeader = 0x83
+$UseItemHeader = 0x84
 $PickUpItemHeader = 0x45
 $DropItemHeader = 0x32
-$MoveItemHeader = 0x77
-$AcceptAllItemsHeader = 0x78
+$MoveItemHeader = 0x78
+$AcceptAllItemsHeader = 0x79
 $DropGoldHeader = 0x35
-$ChangeGoldHeader = 0x81
+$ChangeGoldHeader = 0x82
 $AddHeroHeader = 0x23
 $KickHeroHeader = 0x24
 $AddNpcHeader = 0xA5
-$KickNpcHeader = 0xAE
+$KickNpcHeader = 0xAD
 $CommandHeroHeader = 0x1E
 $CommandAllHeader = 0x1F
 $DropHerosBundleHeader = 0x19
 $LockHeroTargetHeader = 0x18
 $SetHeroAggressionHeader = 0x17
 $ChangeHeroSkillSlotStateHeader = 0x1C
-$SetDisplayedTitleHeader = 0x5D
-$RemoveDisplayedTitleHeader = 0x5E
+$SetDisplayedTitleHeader = 0x5E
+$RemoveDisplayedTitleHeader = 0x5F
 $GoPlayerHeader = 0x39
 $GoNPCHeader = 0x3F
 $GoSignpostHeader = 0x57
 $AttackHeader = 0x2C
-$MoveMapHeader = 0xB7
-$ReturnToOutpostHeader = 0xAD
-$EnterChallengeHeader = 0xAB
-$TravelGHHeader = 0xB6
-$LeaveGHHeader = 0xB8
+$MoveMapHeader = 0xB8
+$ReturnToOutpostHeader = 0xAE
+$EnterChallengeHeader = 0xAC
+$TravelGHHeader = 0xB7
+$LeaveGHHeader = 0xB9
 $AbandonQuestHeader = 0x12
-$CallTargetHeader = 0x28
+$CallTargetHeader = 0x2C
 $CancelActionHeader = 0x2E
 $OpenChestHeader = 0x59
 $DropBuffHeader = 0x2F
 $LeaveGroupHeader = 0xA8
-$SwitchModeHeader = 0xA1
+$SwitchModeHeader = 0xA2
 $DonateFactionHeader = 0x3B
 $DialogHeader = 0x41
 $SkipCinematicHeader = 0x68
-$SetSkillbarSkillHeader = 0x61
-$LoadSkillbarHeader = 0x62
+$SetSkillbarSkillHeader = 0x62
+$LoadSkillbarHeader = 0x63
 $ChangeSecondProfessionHeader = 0x47
-$SendChatHeader = 0x69
+$SendChatHeader = 0x6A
 $SetAttributesHeader = 0x10
 $GoldStorageHeader = 0x94
 $GoldCharacterHeader = 0x90
@@ -372,7 +372,7 @@ Func Initialize($aGW, $bChangeTitle = True, $notUsed1 = 0, $notUsed2 = 0)
 	SetValue('SalvageGlobal', MemoryRead(MemoryRead(GetValue('ScanSalvageGlobal') + 8) + 1))
 	SetValue('MoveFunction', '0x' & Hex(GetScannedAddress('ScanMoveFunction', 1), 8))
 	SetValue('UseSkillFunction', '0x' & Hex(GetScannedAddress('ScanUseSkillFunction', 1), 8))
-	SetValue('ChangeTargetFunction', '0x' & Hex(GetScannedAddress('ScanChangeTargetFunction', -119), 8))
+	SetValue('ChangeTargetFunction', '0x' & Hex(GetScannedAddress('ScanChangeTargetFunction', -0x78), 8))
 	SetValue('WriteChatFunction', '0x' & Hex(GetScannedAddress('ScanWriteChatFunction', 1), 8))
 	SetValue('SellItemFunction', '0x' & Hex(GetScannedAddress('ScanSellItemFunction', -85), 8))
 	SetValue('PacketSendFunction', '0x' & Hex(GetScannedAddress('ScanPacketSendFunction', 1), 8))
@@ -1562,7 +1562,8 @@ EndFunc   ;==>ClearTarget
 
 ;~ Description: Target the nearest enemy.
 Func TargetNearestEnemy()
-	Return PerformAction(0x93, 0x18)
+	Local $target = GetNearestEnemyToAgent(-2)
+    	ChangeTarget($target)
 EndFunc   ;==>TargetNearestEnemy
 
 ;~ Description: Target the next enemy.
@@ -1722,7 +1723,7 @@ Func SendChat($aMessage, $aChannel = '!')
 		$lMessage = $aMessage
 	EndIf
 
-	MemoryWrite($lAddress + 8, $aChannel & $lMessage, 'wchar[122]')
+	MemoryWrite($lAddress + 12, $aChannel & $lMessage, 'wchar[122]')
 	DllCall($mKernelHandle, 'int', 'WriteProcessMemory', 'int', $mGWProcHandle, 'int', $lAddress, 'ptr', $mSendChatPtr, 'int', 8, 'int', '')
 
 	If StringLen($aMessage) > 120 Then SendChat(StringTrimLeft($aMessage, 120), $aChannel)
